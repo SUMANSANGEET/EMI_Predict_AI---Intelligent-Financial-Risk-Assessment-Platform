@@ -1,8 +1,55 @@
-node_modules/
-build/
-dist/
-coverage/
-.DS_Store
-*.log
-.env*
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Environment variables / secrets
+.env
+.env.*
 !.env.example
+
+# Streamlit
+.streamlit/secrets.toml
+
+# ML / experiment artifacts
+mlruns/
+.mlflow/
+artifacts/
+
+# Python packaging
+*.egg-info/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# Cache
+.cache/
+.pytest_cache/
+
+# Large generated files
+*.db
+*.sqlite
+*.sqlite3
