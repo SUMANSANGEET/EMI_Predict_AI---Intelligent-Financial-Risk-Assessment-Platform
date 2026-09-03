@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 __pycache__/
 *.py[cod]
 
@@ -41,3 +42,60 @@ coverage/
 .env*
 !.env.example
 >>>>>>> 36432aece4e883af640ed924c41789a0691638c2
+=======
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Environment variables / secrets
+.env
+.env.*
+!.env.example
+
+# Streamlit
+.streamlit/secrets.toml
+
+# ML / experiment artifacts
+mlruns/
+.mlflow/
+artifacts/
+
+# Python packaging
+*.egg-info/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# Cache
+.cache/
+.pytest_cache/
+
+# Large generated files
+*.db
+*.sqlite
+*.sqlite3
+>>>>>>> 4b327748ffadabd03d5d94bea084c3d8f081e10f
