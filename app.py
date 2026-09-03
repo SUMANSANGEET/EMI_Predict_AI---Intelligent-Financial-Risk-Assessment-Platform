@@ -39,21 +39,18 @@ st.set_page_config(
 # Professional Geometric Styling
 st.markdown("""
 <style>
-    /* Metric Card Styling */
+        /* Metric Card Styling */
     div[data-testid="metric-container"] {
-        background-color: rgba(255, 99, 71, 0.2);
+        background-color: #ffffff;
         border: 1px solid #e2e8f0;
         padding: 14px 18px;
         border-radius: 10px;
-        box-shadow: 0 1px 2px 0 rgba(255, 99, 71, 0.8);
+        box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.08);
     }
 
     /* Header Accent */
-    /* Header Accent — solid background instead of transparent */
     .stApp header {
-        background-color: #ffffff;
-        border-bottom: 1px solid #e2e8f0;
-    }
+        background-color: transparent;
 
     /* Custom Badge */
     .badge-pill {
