@@ -48,7 +48,7 @@ st.markdown("""
     
     /* Header Accent */
     .stApp header {
-        background-color: transparent;
+        background-color: chartreuse;
     }
     
     /* Custom Badge */
