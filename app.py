@@ -1,5 +1,6 @@
 """
 EMIPredict AI - Production Streamlit FinTech Application
+Banking UI Edition — Ledger / Statement Visual System
 Author: P Suman Sangeet (sumansangeet789@gmail.com)
 Role: Data Science & Machine Learning Intern @ INNOVEXIS
 
@@ -13,6 +14,11 @@ Features:
 - Responsive Layout & Comprehensive Error Handling
 - Recruiter-facing interactive visuals: gauges, radar charts, Sankey pipeline flow,
   correlation heatmap, sunburst, experiment trend line, project Gantt timeline
+
+Visual identity: a "banking ledger / statement" system — deep ink-navy,
+burnished brass, ledger-emerald and rust-red, serif statement headlines
+paired with a technical sans body face, hairline-bordered paper cards
+instead of soft SaaS shadows.
 """
 
 import streamlit as st
@@ -30,48 +36,214 @@ import os
 # 1. PAGE CONFIGURATION & STYLING
 # ==========================================
 st.set_page_config(
-    page_title="EMIPredict AI - FinTech Risk & MLflow Platform",
-    page_icon="💳",
+    page_title="EMIPredict AI - Banking Risk & MLOps Platform",
+    page_icon="🏦",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Professional Geometric Styling
-st.markdown("""
+# ------------------------------------------
+# Ledger color system — single source of truth for every chart & style below
+# ------------------------------------------
+COLORS = {
+    "navy": "#0B1F3A",
+    "navy_light": "#14294D",
+    "paper": "#F7F4EC",
+    "paper_line": "#E1DACB",
+    "emerald": "#145C43",
+    "gold": "#A9812D",
+    "gold_soft": "#E8D9AE",
+    "rust": "#8C2F1B",
+    "slate": "#1C2B39",
+    "muted": "#64707C",
+}
+
+ELIGIBILITY_COLORS = {
+    "Eligible": COLORS["emerald"],
+    "High_Risk": COLORS["gold"],
+    "Not_Eligible": COLORS["rust"]
+}
+
+# Diverging scale for correlation heatmap: rust (negative) -> paper (neutral) -> emerald (positive)
+LEDGER_DIVERGING = [COLORS["rust"], "#FFFFFF", COLORS["emerald"]]
+
+# Qualitative sequence for categorical breakdowns (loan purposes, etc.)
+LEDGER_QUALITATIVE = [COLORS["navy"], COLORS["gold"], COLORS["emerald"], COLORS["rust"], COLORS["muted"]]
+
+# Sequential progression for the Gantt build timeline (engineering -> deployment)
+LEDGER_SEQUENTIAL = ["#0B1F3A", "#26456E", "#4A6076", "#8A7550", "#A9812D", "#5C3A21"]
+
+# Banking emblem — a simple ledger/institution mark reused in the masthead & sidebar
+BANK_MARK_SVG = """
+<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M12 2L22 8H2L12 2Z" fill="{gold}"/>
+  <rect x="4" y="9" width="2.4" height="9.2" fill="{gold}"/>
+  <rect x="9.8" y="9" width="2.4" height="9.2" fill="{gold}"/>
+  <rect x="15.6" y="9" width="2.4" height="9.2" fill="{gold}"/>
+  <rect x="2" y="19" width="20" height="1.8" fill="{gold}"/>
+</svg>
+""".format(gold=COLORS["gold"])
+
+# Banking-Ledger Styling
+st.markdown(f"""
 <style>
-    /* Metric Card Styling */
-    div[data-testid="metric-container"] {
-        background-color: rgba(255, 99, 71, 0.2);
-        border: 1px solid #e2e8f0;
-        padding: 14px 18px;
-        border-radius: 10px;
-        box-shadow: 0 1px 2px 0 rgba(255, 99, 71, 0.8);
-    }     can you change it
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
 
-    /* Header Accent */
-    .stApp header {
-        background-color: transparent;
+html, body, [class*="css"] {{
+    font-family: 'IBM Plex Sans', sans-serif;
+}}
 
-    /* Custom Badge */
-    .badge-pill {
-        display: inline-block;
-        padding: 2px 8px;
-        font-size: 11px;
-        font-weight: 700;
-        border-radius: 4px;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-    }
-    .badge-blue {
-        background-color: lightblue;
-        color: #1e40af;
-        border: 1px solid #bfdbfe;
-    }
-    .badge-green {
-        background-color: #dcfce7;
-        color: #166534;
-        border: 1px solid #bbf7d0;
-    }
+.stApp {{
+    background-color: {COLORS['paper']};
+}}
+
+h1, h2, h3, .stApp h1, .stApp h2, .stApp h3 {{
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    color: {COLORS['navy']};
+    letter-spacing: -0.01em;
+}}
+
+/* Letterhead masthead, shown above every page */
+.masthead {{
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 2px 16px 2px;
+    border-bottom: 2px solid {COLORS['gold']};
+    margin-bottom: 24px;
+}}
+.masthead .mark {{
+    width: 38px; height: 38px;
+    background-color: {COLORS['navy']};
+    border-radius: 3px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    padding: 8px;
+    box-sizing: border-box;
+}}
+.masthead .wordwrap {{ line-height: 1.15; }}
+.masthead .wordmark {{
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: {COLORS['navy']};
+}}
+.masthead .wordmark .accent {{ color: {COLORS['gold']}; }}
+.masthead .tagline {{
+    font-size: 12.5px;
+    color: {COLORS['muted']};
+    margin-top: 1px;
+}}
+.masthead .role-chip {{
+    margin-left: auto;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: {COLORS['navy']};
+    background-color: {COLORS['gold_soft']};
+    border: 1px solid {COLORS['gold']};
+    padding: 6px 13px;
+    border-radius: 3px;
+    white-space: nowrap;
+}}
+
+/* Metric Card Styling */
+div[data-testid="metric-container"] {{
+    background-color: #FFFFFF;
+    border: 1px solid {COLORS['paper_line']};
+    border-left: 3px solid {COLORS['gold']};
+    padding: 14px 18px;
+    border-radius: 4px;
+    box-shadow: none;
+}}
+
+.stApp header {{
+    background-color: transparent;
+}}
+
+/* General-purpose paper/ledger card */
+.ledger-card {{
+    background-color: #FFFFFF;
+    border: 1px solid {COLORS['paper_line']};
+    border-radius: 4px;
+    padding: 16px 18px;
+}}
+
+/* Badge pills */
+.badge-pill {{
+    display: inline-block;
+    padding: 3px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 3px;
+    letter-spacing: 0.03em;
+}}
+.badge-navy {{
+    background-color: {COLORS['navy']};
+    color: {COLORS['paper']};
+}}
+.badge-gold {{
+    background-color: {COLORS['gold_soft']};
+    color: {COLORS['navy']};
+    border: 1px solid {COLORS['gold']};
+}}
+.badge-emerald {{
+    background-color: rgba(20, 92, 67, 0.12);
+    color: {COLORS['emerald']};
+    border: 1px solid rgba(20, 92, 67, 0.35);
+}}
+.badge-rust {{
+    background-color: rgba(140, 47, 27, 0.12);
+    color: {COLORS['rust']};
+    border: 1px solid rgba(140, 47, 27, 0.35);
+}}
+
+/* Sidebar — teller / vault panel */
+section[data-testid="stSidebar"] {{
+    background-color: {COLORS['navy']};
+}}
+section[data-testid="stSidebar"] p,
+section[data-testid="stSidebar"] span,
+section[data-testid="stSidebar"] label,
+section[data-testid="stSidebar"] div {{
+    color: {COLORS['paper']};
+}}
+section[data-testid="stSidebar"] hr {{
+    border-color: rgba(247,244,236,0.25);
+}}
+
+/* Buttons */
+.stButton>button, .stDownloadButton>button, .stFormSubmitButton>button {{
+    background-color: {COLORS['navy']};
+    color: {COLORS['paper']};
+    border: 1px solid {COLORS['navy']};
+    border-radius: 3px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-weight: 500;
+}}
+.stButton>button:hover, .stDownloadButton>button:hover, .stFormSubmitButton>button:hover {{
+    background-color: {COLORS['gold']};
+    border-color: {COLORS['gold']};
+    color: {COLORS['navy']};
+}}
+
+/* Forms & expanders */
+div[data-testid="stForm"] {{
+    border: 1px solid {COLORS['paper_line']};
+    border-radius: 4px;
+    background-color: #FFFFFF;
+    padding: 6px 6px 0 6px;
+}}
+[data-testid="stExpander"] {{
+    border: 1px solid {COLORS['paper_line']};
+    border-radius: 4px;
+    background-color: #FFFFFF;
+}}
+[data-testid="stExpander"] summary, .streamlit-expanderHeader {{
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-weight: 600;
+    color: {COLORS['navy']};
+}}
 </style>
 """, unsafe_allow_html=True)
 
@@ -151,35 +323,37 @@ if "db_conn" not in st.session_state:
 # ==========================================
 # 2B. REUSABLE VISUAL HELPERS (recruiter-facing)
 # ==========================================
-def make_gauge(value, title, suffix="%", max_val=100, color="#2563eb"):
+def make_gauge(value, title, suffix="%", max_val=100, color=COLORS["navy"]):
     """Compact gauge indicator for headline KPIs."""
     fig = go.Figure(go.Indicator(
         mode="gauge+number",
         value=value,
-        number={'suffix': suffix, 'font': {'size': 22}},
-        title={'text': title, 'font': {'size': 12}},
+        number={'suffix': suffix, 'font': {'size': 22, 'color': COLORS["slate"]}},
+        title={'text': title, 'font': {'size': 12, 'color': COLORS["muted"]}},
         gauge={
             'axis': {'range': [0, max_val], 'tickfont': {'size': 9}},
             'bar': {'color': color, 'thickness': 0.3},
             'bgcolor': "white",
+            'bordercolor': COLORS["paper_line"],
             'steps': [
-                {'range': [0, max_val * 0.6], 'color': "#fee2e2"},
-                {'range': [max_val * 0.6, max_val * 0.85], 'color': "#fef3c7"},
-                {'range': [max_val * 0.85, max_val], 'color': "#dcfce7"},
+                {'range': [0, max_val * 0.6], 'color': "#F3E0D8"},
+                {'range': [max_val * 0.6, max_val * 0.85], 'color': "#F6EAD2"},
+                {'range': [max_val * 0.85, max_val], 'color': "#DCEAE3"},
             ],
         }
     ))
-    fig.update_layout(height=190, margin=dict(l=15, r=15, t=40, b=10))
+    fig.update_layout(height=190, margin=dict(l=15, r=15, t=40, b=10), paper_bgcolor="white")
     return fig
 
 
-def make_radar(categories, values, title, color="#2563eb"):
+def make_radar(categories, values, title, color=COLORS["navy"]):
     """Single-series radar for multi-dimensional health/skill snapshots."""
     fig = go.Figure()
     fig.add_trace(go.Scatterpolar(r=values, theta=categories, fill='toself', line_color=color))
     fig.update_layout(
         polar=dict(radialaxis=dict(visible=True, range=[0, max(values + [1]) * 1.15])),
-        showlegend=False, title=title, height=330, margin=dict(l=30, r=30, t=50, b=20)
+        showlegend=False, title=title, height=330, margin=dict(l=30, r=30, t=50, b=20),
+        paper_bgcolor="white", font=dict(color=COLORS["slate"])
     )
     return fig
 
@@ -267,20 +441,20 @@ def predict_dual_model(features: dict) -> dict:
 # 4. SIDEBAR & NAVIGATION
 # ==========================================
 with st.sidebar:
-    st.markdown("""
+    st.markdown(f"""
     <div style='display: flex; align-items: center; gap: 8px; margin-bottom: 12px;'>
-        <div style='width: 28px; height: 28px; background-color: #2563eb; border-radius: 4px; display: flex; align-items: center; justify-content: center;'>
-            <div style='width: 14px; height: 14px; border: 2px solid white; transform: rotate(45deg);'></div>
+        <div style='width: 32px; height: 32px; background-color: {COLORS['navy_light']}; border: 1px solid {COLORS['gold']}; border-radius: 4px; display: flex; align-items: center; justify-content: center; padding: 6px; box-sizing: border-box;'>
+            {BANK_MARK_SVG}
         </div>
         <div>
-            <h3 style='margin: 0; font-size: 16px; font-weight: 700; color: #1e293b;'>EMIPredict <span style='color: #2563eb;'>AI</span></h3>
-            <p style='margin: 0; font-size: 10px; color: #64748b;'>FinTech MLOps Console</p>
+            <h3 style='margin: 0; font-size: 16px; font-weight: 700; color: {COLORS["paper"]};'>EMIPredict <span style='color: {COLORS["gold"]};'>AI</span></h3>
+            <p style='margin: 0; font-size: 10px; color: {COLORS["gold_soft"]};'>FinTech MLOps Console</p>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
     # Active Role & Persona Switcher
-    st.markdown("<p style='font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 4px;'>Select Active Persona (RBAC)</p>", unsafe_allow_html=True)
+    st.markdown(f"<p style='font-size: 11px; font-weight: 700; color: {COLORS['gold_soft']}; text-transform: uppercase; margin-bottom: 4px;'>Select Active Persona (RBAC)</p>", unsafe_allow_html=True)
     selected_role_key = st.selectbox(
         "Active Role",
         options=list(USER_CREDENTIALS.keys()),
@@ -291,9 +465,9 @@ with st.sidebar:
     user_perms = ROLE_PERMISSIONS[st.session_state.auth_user["role"]]
 
     st.markdown(f"""
-    <div style='background: #f1f5f9; padding: 8px 12px; border-radius: 6px; margin-bottom: 16px; font-size: 11px;'>
-        <strong>Tier:</strong> <span class='badge-pill badge-blue'>{st.session_state.auth_user['role'].upper()}</span><br>
-        <span style='color: #64748b;'>{st.session_state.auth_user['title']}</span>
+    <div style='background: {COLORS["navy_light"]}; padding: 8px 12px; border-radius: 6px; margin-bottom: 16px; font-size: 11px; border: 1px solid rgba(247,244,236,0.15);'>
+        <strong>Tier:</strong> <span class='badge-pill badge-gold'>{st.session_state.auth_user['role'].upper()}</span><br>
+        <span style='color: {COLORS["gold_soft"]};'>{st.session_state.auth_user['title']}</span>
     </div>
     """, unsafe_allow_html=True)
 
@@ -311,16 +485,30 @@ with st.sidebar:
     selected_page = st.radio("Navigation", nav_options, index=0, label_visibility="collapsed")
 
     st.markdown("---")
-    st.markdown("""
-    <div style='font-size: 11px; color: #64748b;'>
-        <strong>Platform Stats:</strong><br>
+    st.markdown(f"""
+    <div style='font-size: 11px; color: {COLORS["gold_soft"]};'>
+        <strong style='color: {COLORS["paper"]};'>Platform Stats:</strong><br>
         • Dataset: 404,773 loan profiles<br>
         • Champion Model: Dual XGBoost<br>
         • Classification Acc: 95.8%<br>
-        • Regression R²: 0.993<br>
+        • Regression R&sup2;: 0.993<br>
         • Developer: P Suman Sangeet
     </div>
     """, unsafe_allow_html=True)
+
+# ------------------------------------------
+# Statement letterhead — shown above every page for a consistent bank identity
+# ------------------------------------------
+st.markdown(f"""
+<div class="masthead">
+    <div class="mark">{BANK_MARK_SVG}</div>
+    <div class="wordwrap">
+        <div class="wordmark">EMIPredict <span class="accent">AI</span></div>
+        <div class="tagline">Underwriting &amp; Risk Intelligence Platform</div>
+    </div>
+    <div class="role-chip">{st.session_state.auth_user['name']} · {st.session_state.auth_user['title']}</div>
+</div>
+""", unsafe_allow_html=True)
 
 # ==========================================
 # 5. PAGE 1: OVERVIEW & ARCHITECTURE
@@ -339,7 +527,7 @@ if selected_page == "1. Overview & Architecture":
     with g3:
         st.plotly_chart(make_gauge(99.3, "Regression R²"), use_container_width=True)
     with g4:
-        st.plotly_chart(make_gauge(100, "Records Verified", color="#16a34a"), use_container_width=True)
+        st.plotly_chart(make_gauge(100, "Records Verified", color=COLORS["emerald"]), use_container_width=True)
 
     st.markdown("---")
 
@@ -350,7 +538,7 @@ if selected_page == "1. Overview & Architecture":
             pad=18, thickness=16,
             label=["Raw Records (404,773)", "Sanitization & Imputation", "Feature Engineering",
                    "Classifier (XGBoost)", "Regressor (XGBoost)", "MLflow Registry", "Streamlit Dashboard"],
-            color=["#94a3b8", "#60a5fa", "#2563eb", "#16a34a", "#0ea5e9", "#7c3aed", "#0f172a"]
+            color=["#9AA5AF", COLORS["muted"], COLORS["navy"], COLORS["emerald"], COLORS["gold"], "#5C3A21", COLORS["navy_light"]]
         ),
         link=dict(
             source=[0, 1, 2, 2, 3, 4, 5, 5],
@@ -358,7 +546,7 @@ if selected_page == "1. Overview & Architecture":
             value=[404773, 404773, 404773, 404773, 404773, 404773, 200000, 200000]
         )
     ))
-    sankey_fig.update_layout(height=320, margin=dict(l=10, r=10, t=10, b=10), font_size=11)
+    sankey_fig.update_layout(height=320, margin=dict(l=10, r=10, t=10, b=10), font_size=11, paper_bgcolor="white")
     st.plotly_chart(sankey_fig, use_container_width=True)
 
     # System Architecture narrative (kept for detail, now supporting context to the diagram)
@@ -468,12 +656,12 @@ elif selected_page == "2. Real-Time Dual Predictor":
 
     with res_col1:
         # Classifier outcome card
-        status_color = "#16a34a" if pred_res["eligibility"] == "Eligible" else ("#d97706" if pred_res["eligibility"] == "High_Risk" else "#dc2626")
+        status_color = ELIGIBILITY_COLORS[pred_res["eligibility"]]
         st.markdown(f"""
-        <div style='background-color: #f8fafc; border: 1px solid #e2e8f0; border-left: 6px solid {status_color}; padding: 18px; border-radius: 8px;'>
-            <p style='margin: 0; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase;'>Classification Model Outcome</p>
+        <div style='background-color: #FFFFFF; border: 1px solid {COLORS["paper_line"]}; border-left: 6px solid {status_color}; padding: 18px; border-radius: 4px;'>
+            <p style='margin: 0; font-size: 11px; font-weight: 700; color: {COLORS["muted"]}; text-transform: uppercase;'>Classification Model Outcome</p>
             <h2 style='margin: 4px 0; color: {status_color};'>{pred_res["eligibility"].replace("_", " ")}</h2>
-            <p style='font-size: 13px; color: #334155; margin: 0;'>Confidence: {max(pred_res["probabilities"].values())*100:.1f}%</p>
+            <p style='font-size: 13px; color: {COLORS["slate"]}; margin: 0;'>Confidence: {max(pred_res["probabilities"].values())*100:.1f}%</p>
         </div>
         """, unsafe_allow_html=True)
 
@@ -484,27 +672,27 @@ elif selected_page == "2. Real-Time Dual Predictor":
         })
         fig_prob = px.bar(
             probs_df, x="Class", y="Probability", color="Class",
-            color_discrete_map={"Eligible": "#16a34a", "High_Risk": "#d97706", "Not_Eligible": "#dc2626"},
+            color_discrete_map=ELIGIBILITY_COLORS,
             height=220
         )
-        fig_prob.update_layout(margin=dict(l=10, r=10, t=25, b=10), yaxis_range=[0, 1])
+        fig_prob.update_layout(margin=dict(l=10, r=10, t=25, b=10), yaxis_range=[0, 1], paper_bgcolor="white", plot_bgcolor="white")
         st.plotly_chart(fig_prob, use_container_width=True)
 
     with res_col2:
         # Regressor outcome card
         is_afford = pred_res["is_affordable"]
-        afford_color = "#16a34a" if is_afford else "#dc2626"
+        afford_color = COLORS["emerald"] if is_afford else COLORS["rust"]
         st.markdown(f"""
-        <div style='background-color: #f8fafc; border: 1px solid #e2e8f0; border-left: 6px solid {afford_color}; padding: 18px; border-radius: 8px;'>
-            <p style='margin: 0; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase;'>Continuous Installment Regressor</p>
-            <h2 style='margin: 4px 0; color: #0f172a;'>₹{pred_res["max_safe_monthly_emi"]:,.0f} <span style='font-size: 14px; font-weight: 400; color: #64748b;'>/month</span></h2>
-            <p style='font-size: 13px; color: #334155; margin: 0;'>Requested Installment: ₹{pred_res["requested_emi"]:,.0f} | <strong>{"Affordable" if is_afford else "Exceeds Safe Limit"}</strong></p>
+        <div style='background-color: #FFFFFF; border: 1px solid {COLORS["paper_line"]}; border-left: 6px solid {afford_color}; padding: 18px; border-radius: 4px;'>
+            <p style='margin: 0; font-size: 11px; font-weight: 700; color: {COLORS["muted"]}; text-transform: uppercase;'>Continuous Installment Regressor</p>
+            <h2 style='margin: 4px 0; color: {COLORS["navy"]};'>₹{pred_res["max_safe_monthly_emi"]:,.0f} <span style='font-size: 14px; font-weight: 400; color: {COLORS["muted"]};'>/month</span></h2>
+            <p style='font-size: 13px; color: {COLORS["slate"]}; margin: 0;'>Requested Installment: ₹{pred_res["requested_emi"]:,.0f} | <strong>{"Affordable" if is_afford else "Exceeds Safe Limit"}</strong></p>
         </div>
         """, unsafe_allow_html=True)
 
         # Financial Health Metrics
         st.markdown(f"""
-        <div style='margin-top: 16px; font-size: 12px; background: white; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px;'>
+        <div style='margin-top: 16px; font-size: 12px; background: white; border: 1px solid {COLORS["paper_line"]}; padding: 12px; border-radius: 4px;'>
             • <strong>Debt-to-Income (DTI):</strong> {eng["debt_to_income"]*100:.1f}% (Benchmark: &le; 45%)<br>
             • <strong>Fixed Obligation Ratio (FOIR):</strong> {eng["foir"]*100:.1f}% (Benchmark: &le; 50%)<br>
             • <strong>Monthly Disposable Income:</strong> ₹{eng["disposable_income"]:,.0f}<br>
@@ -586,17 +774,17 @@ elif selected_page == "3. Interactive Data Explorer (EDA)":
         st.subheader("Loan Purpose Breakdown")
         purpose_counts = sample_df["Loan_Purpose"].value_counts().reset_index()
         purpose_counts.columns = ["Purpose", "Count"]
-        fig1 = px.pie(purpose_counts, names="Purpose", values="Count", hole=0.4, color_discrete_sequence=px.colors.qualitative.Prism)
-        fig1.update_layout(margin=dict(l=10, r=10, t=10, b=10), height=300)
+        fig1 = px.pie(purpose_counts, names="Purpose", values="Count", hole=0.4, color_discrete_sequence=LEDGER_QUALITATIVE)
+        fig1.update_layout(margin=dict(l=10, r=10, t=10, b=10), height=300, paper_bgcolor="white")
         st.plotly_chart(fig1, use_container_width=True)
 
     with c2:
         st.subheader("Credit Score vs. Eligibility")
         fig2 = px.box(
             sample_df, x="Eligibility", y="Credit_Score", color="Eligibility",
-            color_discrete_map={"Eligible": "#16a34a", "High_Risk": "#d97706", "Not_Eligible": "#dc2626"}
+            color_discrete_map=ELIGIBILITY_COLORS
         )
-        fig2.update_layout(margin=dict(l=10, r=10, t=10, b=10), height=300)
+        fig2.update_layout(margin=dict(l=10, r=10, t=10, b=10), height=300, paper_bgcolor="white", plot_bgcolor="white")
         st.plotly_chart(fig2, use_container_width=True)
 
     # Visual 2: Salary vs. Loan Amount Affordability Scatter
@@ -604,27 +792,27 @@ elif selected_page == "3. Interactive Data Explorer (EDA)":
     fig3 = px.scatter(
         sample_df, x="Monthly_Salary", y="Requested_Amount", color="Eligibility",
         size="DTI", hover_data=["Credit_Score", "Loan_Purpose"],
-        color_discrete_map={"Eligible": "#16a34a", "High_Risk": "#d97706", "Not_Eligible": "#dc2626"},
+        color_discrete_map=ELIGIBILITY_COLORS,
         opacity=0.7, height=400
     )
-    fig3.update_layout(margin=dict(l=10, r=10, t=10, b=10))
+    fig3.update_layout(margin=dict(l=10, r=10, t=10, b=10), paper_bgcolor="white", plot_bgcolor="white")
     st.plotly_chart(fig3, use_container_width=True)
 
     # Visual 3: Correlation Heatmap (new — shows feature relationships at a glance)
     st.subheader("Feature Correlation Heatmap")
     corr_df = sample_df[["Monthly_Salary", "Credit_Score", "Requested_Amount", "DTI"]].corr()
-    fig_heat = px.imshow(corr_df, text_auto=".2f", color_continuous_scale="RdBu_r", zmin=-1, zmax=1, height=350)
-    fig_heat.update_layout(margin=dict(l=10, r=10, t=10, b=10))
+    fig_heat = px.imshow(corr_df, text_auto=".2f", color_continuous_scale=LEDGER_DIVERGING, zmin=-1, zmax=1, height=350)
+    fig_heat.update_layout(margin=dict(l=10, r=10, t=10, b=10), paper_bgcolor="white")
     st.plotly_chart(fig_heat, use_container_width=True)
 
     # Visual 4: Sunburst of Purpose -> Eligibility (new — hierarchical segment view)
     st.subheader("Loan Purpose vs Eligibility Breakdown")
     fig_sun = px.sunburst(
         sample_df, path=["Loan_Purpose", "Eligibility"], color="Eligibility",
-        color_discrete_map={"Eligible": "#16a34a", "High_Risk": "#d97706", "Not_Eligible": "#dc2626"},
+        color_discrete_map=ELIGIBILITY_COLORS,
         height=420
     )
-    fig_sun.update_layout(margin=dict(l=10, r=10, t=10, b=10))
+    fig_sun.update_layout(margin=dict(l=10, r=10, t=10, b=10), paper_bgcolor="white")
     st.plotly_chart(fig_sun, use_container_width=True)
 
 # ==========================================
@@ -666,17 +854,19 @@ elif selected_page == "4. MLflow MLOps Dashboard":
         champ_vals = [95.8, 99.8, 95.6, 100 - 3.8 * 5]
         light_vals = [94.1, 98.4, 93.9, 100 - 2.9 * 5]
         fig_r = go.Figure()
-        fig_r.add_trace(go.Scatterpolar(r=champ_vals, theta=cat, fill='toself', name="XGBoost (Champion)", line_color="#2563eb"))
-        fig_r.add_trace(go.Scatterpolar(r=light_vals, theta=cat, fill='toself', name="LightGBM (Staging)", line_color="#d97706"))
-        fig_r.update_layout(polar=dict(radialaxis=dict(visible=True, range=[0, 100])), height=340, margin=dict(l=30, r=30, t=30, b=20))
+        fig_r.add_trace(go.Scatterpolar(r=champ_vals, theta=cat, fill='toself', name="XGBoost (Champion)", line_color=COLORS["navy"]))
+        fig_r.add_trace(go.Scatterpolar(r=light_vals, theta=cat, fill='toself', name="LightGBM (Staging)", line_color=COLORS["gold"]))
+        fig_r.update_layout(polar=dict(radialaxis=dict(visible=True, range=[0, 100])), height=340, margin=dict(l=30, r=30, t=30, b=20), paper_bgcolor="white")
         st.plotly_chart(fig_r, use_container_width=True)
     with trend_col:
         run_dates = pd.date_range(end=datetime.now(), periods=6, freq="7D")
         trend_df = pd.DataFrame({"Date": run_dates, "Accuracy": [0.912, 0.928, 0.941, 0.949, 0.955, 0.958]})
         fig_trend = px.line(trend_df, x="Date", y="Accuracy", markers=True, height=340,
-                             title="Accuracy Improvement Across Experiment Runs")
-        fig_trend.update_layout(margin=dict(l=10, r=10, t=30, b=10))
+                             title="Accuracy Improvement Across Experiment Runs",
+                             color_discrete_sequence=[COLORS["navy"]])
+        fig_trend.update_layout(margin=dict(l=10, r=10, t=30, b=10), paper_bgcolor="white", plot_bgcolor="white")
         fig_trend.update_yaxes(tickformat=".0%")
+        fig_trend.update_traces(marker=dict(color=COLORS["gold"], size=8))
         st.plotly_chart(fig_trend, use_container_width=True)
 
     # Production Promotion Control (Admin only)
@@ -811,7 +1001,7 @@ elif selected_page == "7. Recruiter Technical Portfolio":
     with skill_col:
         skill_cats = ["ML Modeling", "MLOps", "Data Engineering", "Dashboarding", "Financial Domain", "SQL / CRUD"]
         skill_vals = [92, 88, 85, 90, 87, 83]
-        st.plotly_chart(make_radar(skill_cats, skill_vals, "Skill Coverage", color="#7c3aed"), use_container_width=True)
+        st.plotly_chart(make_radar(skill_cats, skill_vals, "Skill Coverage", color=COLORS["gold"]), use_container_width=True)
     with timeline_col:
         phases = pd.DataFrame([
             dict(Phase="Data Ingestion & Cleaning", Start="2026-06-01", Finish="2026-06-10"),
@@ -822,9 +1012,9 @@ elif selected_page == "7. Recruiter Technical Portfolio":
             dict(Phase="Testing & Deployment", Start="2026-07-12", Finish="2026-07-20"),
         ])
         fig_gantt = px.timeline(phases, x_start="Start", x_end="Finish", y="Phase", color="Phase",
-                                 color_discrete_sequence=px.colors.qualitative.Prism, height=340)
+                                 color_discrete_sequence=LEDGER_SEQUENTIAL, height=340)
         fig_gantt.update_yaxes(autorange="reversed")
-        fig_gantt.update_layout(showlegend=False, margin=dict(l=10, r=10, t=20, b=10), title="Project Build Timeline")
+        fig_gantt.update_layout(showlegend=False, margin=dict(l=10, r=10, t=20, b=10), title="Project Build Timeline", paper_bgcolor="white")
         st.plotly_chart(fig_gantt, use_container_width=True)
 
     st.subheader("Architectural Defense & Key Interview Questions")
@@ -854,8 +1044,8 @@ elif selected_page == "7. Recruiter Technical Portfolio":
 # 12. RUNTIME FOOTER
 # ==========================================
 st.markdown("---")
-st.markdown("""
-<div style='text-align: center; font-size: 11px; color: #94a3b8;'>
-    EMIPredict AI Platform • Built with Streamlit, XGBoost, MLflow & Plotly • Developed by P Suman Sangeet
+st.markdown(f"""
+<div style='text-align: center; font-size: 11px; color: {COLORS["muted"]};'>
+    EMIPredict AI Platform • Built with Streamlit, XGBoost, MLflow &amp; Plotly • Developed by P Suman Sangeet
 </div>
 """, unsafe_allow_html=True)
