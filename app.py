@@ -49,8 +49,10 @@ st.markdown("""
     }
 
     /* Header Accent */
+    /* Header Accent — solid background instead of transparent */
     .stApp header {
-        background-color: transparent;
+        background-color: #ffffff;
+        border-bottom: 1px solid #e2e8f0;
     }
 
     /* Custom Badge */
