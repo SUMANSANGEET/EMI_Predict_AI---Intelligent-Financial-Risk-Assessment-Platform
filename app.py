@@ -83,8 +83,8 @@ USER_CREDENTIALS = {
     "admin": {
         "password_hash": hashlib.sha256("admin123".encode()).hexdigest(),
         "role": "admin",
-        "name": "Alex Mercer",
-        "title": "Lead Underwriting Architect"
+        "name": "P Suman Sangeet",
+        "title": "Data Scientist"
     },
     "underwriter": {
         "password_hash": hashlib.sha256("underwriter123".encode()).hexdigest(),
