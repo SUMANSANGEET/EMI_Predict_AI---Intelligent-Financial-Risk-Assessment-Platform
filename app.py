@@ -442,13 +442,13 @@ def predict_dual_model(features: dict) -> dict:
 # ==========================================
 with st.sidebar:
     st.markdown(f"""
-    <div style='display: flex; align-items: center; gap: 8px; margin-bottom: 12px;'>
-        <div style='width: 32px; height: 32px; background-color: {COLORS['navy_light']}; border: 1px solid {COLORS['gold']}; border-radius: 4px; display: flex; align-items: center; justify-content: center; padding: 6px; box-sizing: border-box;'>
+    <div style='display: flex; align-items: center; gap: 9px; margin-bottom: 14px;'>
+        <div style='width: 34px; height: 34px; background-color: {COLORS['navy_light']}; border: 1px solid {COLORS['gold']}; border-radius: 4px; display: flex; align-items: center; justify-content: center; padding: 6px; box-sizing: border-box;'>
             {BANK_MARK_SVG}
         </div>
         <div>
-            <h3 style='margin: 0; font-size: 16px; font-weight: 700; color: {COLORS["paper"]};'>EMIPredict <span style='color: {COLORS["gold"]};'>AI</span></h3>
-            <p style='margin: 0; font-size: 10px; color: {COLORS["gold_soft"]};'>FinTech MLOps Console</p>
+            <h3 style='margin: 0; font-size: 17px; font-weight: 700; letter-spacing: -0.01em; color: {COLORS["paper"]};'>EMIPredict <span style='color: {COLORS["gold"]};'>AI</span></h3>
+            <p style='margin: 2px 0 0 0; font-size: 11px; letter-spacing: 0.03em; color: #9FB3C8;'>Credit Risk &amp; MLOps Console</p>
         </div>
     </div>
     """, unsafe_allow_html=True)
