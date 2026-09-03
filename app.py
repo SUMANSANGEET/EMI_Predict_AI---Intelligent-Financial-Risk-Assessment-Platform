@@ -48,7 +48,7 @@ st.markdown("""
     
     /* Header Accent */
     .stApp header {
-        background-color: chartreuse;
+        background-color: transparent;
     }
     
     /* Custom Badge */
@@ -62,7 +62,7 @@ st.markdown("""
         letter-spacing: 0.05em;
     }
     .badge-blue {
-        background-color: #dbeafe;
+        background-color: lightblue;
         color: #1e40af;
         border: 1px solid #bfdbfe;
     }
