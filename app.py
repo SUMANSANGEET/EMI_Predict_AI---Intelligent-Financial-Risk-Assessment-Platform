@@ -39,11 +39,11 @@ st.markdown("""
 <style>
     /* Metric Card Styling */
     div[data-testid="metric-container"] {
-        background-color: rgba(248, 250, 252, 0.8);
+        background-color: rgba(255, 99, 71, 0.2);
         border: 1px solid #e2e8f0;
         padding: 14px 18px;
         border-radius: 10px;
-        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        box-shadow: 0 1px 2px 0 rgba();255, 99, 71, 0.8
     }
     
     /* Header Accent */
