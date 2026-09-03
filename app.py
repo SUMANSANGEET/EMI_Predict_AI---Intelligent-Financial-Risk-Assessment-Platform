@@ -32,6 +32,18 @@ import json
 import sqlite3
 import os
 
+def html_block(content: str) -> str:
+    """
+    Flatten a multi-line HTML/CSS string before passing it to st.markdown.
+    Streamlit's Markdown layer treats 4-space-indented lines as a literal
+    code block (standard Markdown behaviour) — since Python's own source
+    indentation gets baked into multi-line f-strings, nested HTML/CSS here
+    would otherwise render as raw text instead of being parsed as markup.
+    Stripping each line's leading whitespace removes that risk entirely;
+    it has no effect on how the HTML or CSS itself is interpreted.
+    """
+    return "\n".join(line.strip() for line in content.strip("\n").splitlines())
+
 # ==========================================
 # 1. PAGE CONFIGURATION & STYLING
 # ==========================================
@@ -85,7 +97,7 @@ BANK_MARK_SVG = """
 """.format(gold=COLORS["gold"])
 
 # Banking-Ledger Styling
-st.markdown(f"""
+st.markdown(html_block(f"""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
 
@@ -245,7 +257,7 @@ div[data-testid="stForm"] {{
     color: {COLORS['navy']};
 }}
 </style>
-""", unsafe_allow_html=True)
+"""), unsafe_allow_html=True)
 
 # ==========================================
 # 2. RBAC & AUTHENTICATION ENGINE
@@ -441,7 +453,7 @@ def predict_dual_model(features: dict) -> dict:
 # 4. SIDEBAR & NAVIGATION
 # ==========================================
 with st.sidebar:
-    st.markdown(f"""
+    st.markdown(html_block(f"""
     <div style='display: flex; align-items: center; gap: 9px; margin-bottom: 14px;'>
         <div style='width: 34px; height: 34px; background-color: {COLORS['navy_light']}; border: 1px solid {COLORS['gold']}; border-radius: 4px; display: flex; align-items: center; justify-content: center; padding: 6px; box-sizing: border-box;'>
             {BANK_MARK_SVG}
@@ -451,7 +463,7 @@ with st.sidebar:
             <p style='margin: 2px 0 0 0; font-size: 11px; letter-spacing: 0.03em; color: #9FB3C8;'>Credit Risk &amp; MLOps Console</p>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """), unsafe_allow_html=True)
 
     # Active Role & Persona Switcher
     st.markdown(f"<p style='font-size: 11px; font-weight: 700; color: {COLORS['gold_soft']}; text-transform: uppercase; margin-bottom: 4px;'>Select Active Persona (RBAC)</p>", unsafe_allow_html=True)
@@ -464,12 +476,12 @@ with st.sidebar:
     st.session_state.auth_user = USER_CREDENTIALS[selected_role_key]
     user_perms = ROLE_PERMISSIONS[st.session_state.auth_user["role"]]
 
-    st.markdown(f"""
+    st.markdown(html_block(f"""
     <div style='background: {COLORS["navy_light"]}; padding: 8px 12px; border-radius: 6px; margin-bottom: 16px; font-size: 11px; border: 1px solid rgba(247,244,236,0.15);'>
         <strong>Tier:</strong> <span class='badge-pill badge-gold'>{st.session_state.auth_user['role'].upper()}</span><br>
         <span style='color: {COLORS["gold_soft"]};'>{st.session_state.auth_user['title']}</span>
     </div>
-    """, unsafe_allow_html=True)
+    """), unsafe_allow_html=True)
 
     # Navigation Menu
     nav_options = [
@@ -485,7 +497,7 @@ with st.sidebar:
     selected_page = st.radio("Navigation", nav_options, index=0, label_visibility="collapsed")
 
     st.markdown("---")
-    st.markdown(f"""
+    st.markdown(html_block(f"""
     <div style='font-size: 11px; color: {COLORS["gold_soft"]};'>
         <strong style='color: {COLORS["paper"]};'>Platform Stats:</strong><br>
         • Dataset: 404,773 loan profiles<br>
@@ -494,12 +506,12 @@ with st.sidebar:
         • Regression R&sup2;: 0.993<br>
         • Developer: P Suman Sangeet
     </div>
-    """, unsafe_allow_html=True)
+    """), unsafe_allow_html=True)
 
 # ------------------------------------------
 # Statement letterhead — shown above every page for a consistent bank identity
 # ------------------------------------------
-st.markdown(f"""
+st.markdown(html_block(f"""
 <div class="masthead">
     <div class="mark">{BANK_MARK_SVG}</div>
     <div class="wordwrap">
@@ -508,7 +520,7 @@ st.markdown(f"""
     </div>
     <div class="role-chip">{st.session_state.auth_user['name']} · {st.session_state.auth_user['title']}</div>
 </div>
-""", unsafe_allow_html=True)
+"""), unsafe_allow_html=True)
 
 # ==========================================
 # 5. PAGE 1: OVERVIEW & ARCHITECTURE
@@ -657,13 +669,13 @@ elif selected_page == "2. Real-Time Dual Predictor":
     with res_col1:
         # Classifier outcome card
         status_color = ELIGIBILITY_COLORS[pred_res["eligibility"]]
-        st.markdown(f"""
+        st.markdown(html_block(f"""
         <div style='background-color: #FFFFFF; border: 1px solid {COLORS["paper_line"]}; border-left: 6px solid {status_color}; padding: 18px; border-radius: 4px;'>
             <p style='margin: 0; font-size: 11px; font-weight: 700; color: {COLORS["muted"]}; text-transform: uppercase;'>Classification Model Outcome</p>
             <h2 style='margin: 4px 0; color: {status_color};'>{pred_res["eligibility"].replace("_", " ")}</h2>
             <p style='font-size: 13px; color: {COLORS["slate"]}; margin: 0;'>Confidence: {max(pred_res["probabilities"].values())*100:.1f}%</p>
         </div>
-        """, unsafe_allow_html=True)
+        """), unsafe_allow_html=True)
 
         # Probabilities Bar Chart
         probs_df = pd.DataFrame({
@@ -682,23 +694,23 @@ elif selected_page == "2. Real-Time Dual Predictor":
         # Regressor outcome card
         is_afford = pred_res["is_affordable"]
         afford_color = COLORS["emerald"] if is_afford else COLORS["rust"]
-        st.markdown(f"""
+        st.markdown(html_block(f"""
         <div style='background-color: #FFFFFF; border: 1px solid {COLORS["paper_line"]}; border-left: 6px solid {afford_color}; padding: 18px; border-radius: 4px;'>
             <p style='margin: 0; font-size: 11px; font-weight: 700; color: {COLORS["muted"]}; text-transform: uppercase;'>Continuous Installment Regressor</p>
             <h2 style='margin: 4px 0; color: {COLORS["navy"]};'>₹{pred_res["max_safe_monthly_emi"]:,.0f} <span style='font-size: 14px; font-weight: 400; color: {COLORS["muted"]};'>/month</span></h2>
             <p style='font-size: 13px; color: {COLORS["slate"]}; margin: 0;'>Requested Installment: ₹{pred_res["requested_emi"]:,.0f} | <strong>{"Affordable" if is_afford else "Exceeds Safe Limit"}</strong></p>
         </div>
-        """, unsafe_allow_html=True)
+        """), unsafe_allow_html=True)
 
         # Financial Health Metrics
-        st.markdown(f"""
+        st.markdown(html_block(f"""
         <div style='margin-top: 16px; font-size: 12px; background: white; border: 1px solid {COLORS["paper_line"]}; padding: 12px; border-radius: 4px;'>
             • <strong>Debt-to-Income (DTI):</strong> {eng["debt_to_income"]*100:.1f}% (Benchmark: &le; 45%)<br>
             • <strong>Fixed Obligation Ratio (FOIR):</strong> {eng["foir"]*100:.1f}% (Benchmark: &le; 50%)<br>
             • <strong>Monthly Disposable Income:</strong> ₹{eng["disposable_income"]:,.0f}<br>
             • <strong>Emergency Fund Coverage:</strong> {eng["emergency_coverage_months"]} Months of living costs
         </div>
-        """, unsafe_allow_html=True)
+        """), unsafe_allow_html=True)
 
         # Download Underwriting Memo Button
         memo_text = f"""
@@ -1044,8 +1056,8 @@ elif selected_page == "7. Recruiter Technical Portfolio":
 # 12. RUNTIME FOOTER
 # ==========================================
 st.markdown("---")
-st.markdown(f"""
+st.markdown(html_block(f"""
 <div style='text-align: center; font-size: 11px; color: {COLORS["muted"]};'>
     EMIPredict AI Platform • Built with Streamlit, XGBoost, MLflow &amp; Plotly • Developed by P Suman Sangeet
 </div>
-""", unsafe_allow_html=True)
+"""), unsafe_allow_html=True)
