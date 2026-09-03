@@ -1,0 +1,6 @@
+{
+  "name": "EMIPredict AI - Financial Risk & Streamlit ML Platform",
+  "description": "Production-grade Streamlit-inspired FinTech web application for automated EMI eligibility classification, safe installment regression, interactive EDA, MLflow model monitoring, and administrative data management across 400K loan profiles.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

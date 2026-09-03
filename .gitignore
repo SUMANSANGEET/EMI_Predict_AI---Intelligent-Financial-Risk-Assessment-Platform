@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 __pycache__/
 *.py[cod]
 
@@ -30,3 +31,13 @@ Thumbs.db
 *.db
 *.sqlite
 *.sqlite3
+=======
+node_modules/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
+>>>>>>> 36432aece4e883af640ed924c41789a0691638c2
